@@ -15,7 +15,7 @@ public class TeseoSimple extends SimpleTeseoAgentProgram {
     @Override
     public int accion(boolean PF, boolean PD, boolean PA, boolean PI, boolean MT, boolean FAIL) {
         if (MT) return -1; //Meta
-        if (!PI) return 3;
+        if (!PI) return 3; // No hay pared a la izquierda
         if (!PF) return 0;
         if (!PD) return 1;
         return 2;
