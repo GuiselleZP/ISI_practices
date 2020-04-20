@@ -3,6 +3,7 @@ import nsgl.agents.Agent;
 import nsgl.agents.examples.labyrinth.*;
 import nsgl.agents.examples.labyrinth.teseo.simple.RandomReflexTeseo;
 import nsgl.agents.examples.labyrinth.teseo.simple.TeseoTest;
+import nsgl.agents.examples.labyrinth.teseo.simple.TeseoConMatrix;
 import nsgl.agents.simulate.util.*;
 
 public class TeseoMain {
