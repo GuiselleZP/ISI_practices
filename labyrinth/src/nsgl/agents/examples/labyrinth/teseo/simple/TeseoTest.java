@@ -14,6 +14,7 @@ public class TeseoTest extends SimpleTeseoAgentProgram {
 	protected int r;
 	protected int c;
 	protected int o;
+	protected int count;
 	
 	protected static int in = 0;	// if as been in the box			-	m[][][0]	-> 	1	else 	-1
 	protected static int I = 1;		// if there is a wall on the left	-	m[][][1]	-> 	1	else	-1
@@ -24,7 +25,8 @@ public class TeseoTest extends SimpleTeseoAgentProgram {
 	
     public TeseoTest() {
     	r = 50; c = 50; o = 0;
-    	m[r][c][in] = 1;
+    	count = 1;
+    	m[r][c][in] = count;
     }
     
     // Are there roads that I have not traveled?
@@ -94,7 +96,7 @@ public class TeseoTest extends SimpleTeseoAgentProgram {
     		}
     	}    	
     }
-        
+            
     public int getWay() {
     	int a = -1;
     	// mark as visited and advance. Evaluate if there is a wall -> if(m[r][c][I] == 1) is true 
@@ -102,61 +104,61 @@ public class TeseoTest extends SimpleTeseoAgentProgram {
     		switch( o ) {
             case 0:		// head up	
         		if((m[r][c-1][in] == 0) && (m[r][c][I] > 0)) {
-        			m[r][c-1][in] = 1;
+        			m[r][c-1][in] = count++;
         			a = 3;
         		}else if((m[r+1][c][in] == 0) && (m[r][c][F] > 0)) {
-        			m[r+1][c][in] = 1;
+        			m[r+1][c][in] = count++;
         			a = 0;		
         		}else if((m[r][c+1][in] == 0) && (m[r][c][D] > 0)) {
-        			m[r][c+1][in] = 1;
+        			m[r][c+1][in] = count++;
         			a = 1;
         		}else if((m[r-1][c][in] == 0) && (m[r][c][A] > 0)){
-        			m[r-1][c][in] = 1;
+        			m[r-1][c][in] = count++;
         			a = 2;
         		}
             break;	
             case 1:		// head right
         		if((m[r+1][c][in] == 0) && (m[r][c][F] > 0)) {
-        			m[r+1][c][in] = 1;
+        			m[r+1][c][in] = count++;
         			a = 3;
         		}else if((m[r][c+1][in] == 0) && (m[r][c][D] > 0)) {
-        			m[r][c+1][in] = 1;
+        			m[r][c+1][in] = count++;
         			a = 0;
         		}else if((m[r-1][c][in] == 0) && (m[r][c][A] > 0)) {
-        			m[r-1][c][in] = 1;
+        			m[r-1][c][in] = count++;
         			a = 1;
         		}else if((m[r][c-1][in] == 0) && (m[r][c][I] > 0)){
-        			m[r][c-1][in] = 1;
+        			m[r][c-1][in] = count++;
         			a = 2;
         		}
             break;		
             case 2:		// head down
             	if((m[r][c+1][in] == 0) && (m[r][c][D] > 0)) {
-            		m[r][c+1][in] = 1;
+            		m[r][c+1][in] = count++;
         			a = 3;
         		}else if((m[r-1][c][in] == 0) && (m[r][c][A] > 0)) {
-        			m[r-1][c][in] = 1;
+        			m[r-1][c][in] = count++;
         			a = 0;
         		}else if((m[r][c-1][in] == 0) && (m[r][c][I] > 0)) {
-        			m[r][c-1][in] = 1;
+        			m[r][c-1][in] = count++;
         			a = 1;
         		}else if((m[r+1][c][in] == 0) && (m[r][c][F] > 0)){
-        			m[r+1][c][in] = 1;
+        			m[r+1][c][in] = count++;
         			a = 2;
         		}
             break;		
             case 3:		// head left
             	if((m[r-1][c][in] == 0) && (m[r][c][A] > 0)) {
-        			m[r-1][c][in] = 1;
+        			m[r-1][c][in] = count++;
         			a = 3;
         		}else if((m[r][c-1][in] == 0) && (m[r][c][I] > 0)) {
-        			m[r][c-1][in] = 1;
+        			m[r][c-1][in] = count++;
         			a = 0;
         		}else if((m[r+1][c][in] == 0) && (m[r][c][F] > 0)) {
-        			m[r+1][c][in] = 1;
+        			m[r+1][c][in] = count++;
         			a = 1;
         		}else if((m[r][c+1][in] == 0) && (m[r][c][D] > 0)) {
-        			m[r][c+1][in] = 1;
+        			m[r][c+1][in] = count++;
         			a = 2;
         		}
             break;
@@ -165,83 +167,84 @@ public class TeseoTest extends SimpleTeseoAgentProgram {
     		// Start creating walls where the goal is not, 
     		// only if all the sides of the square have been evaluated. if not, it advances.
     		switch( o ) {
-            case 0:		// head up	
-        		if((m[r][c-1][in] >= 0) && (m[r][c][I] > 0)) {
+            case 0:		// head up            	
+            	if(m[r][c-1][in] == (count - 1)) {
         			if((m[r][c][F] != 0) && (m[r][c][D] != 0) && (m[r][c][A] != 0))
         				createWall();
         			a = 3;
-        		}else if((m[r+1][c][in] >= 0) && (m[r][c][F] > 0)) {
+        		}else if(m[r+1][c][in] == (count - 1)) {
         			if((m[r][c][I] != 0) && (m[r][c][D] != 0) && (m[r][c][A] != 0))
         				createWall();
         			a = 0;		
-        		}else if((m[r][c+1][in] >= 0) && (m[r][c][D] > 0)) {
+        		}else if(m[r][c+1][in] == (count - 1)) {
         			if((m[r][c][I] != 0) && (m[r][c][F] >= 0) && (m[r][c][A] != 0))
         				createWall();
         			a = 1;
-        		}else if((m[r-1][c][in] >= 0) && (m[r][c][A] > 0)) {
+        		}else if(m[r-1][c][in] == (count - 1)) {
         			if((m[r][c][I] != 0) && (m[r][c][F] >= 0) && (m[r][c][D] != 0))
         				createWall();
         			a = 2;
         		}
             break;	
             case 1:		// head right
-        		if((m[r+1][c][in] >= 0) && (m[r][c][F] > 0)) {
+        		if(m[r+1][c][in] == (count - 1)) {
         			if((m[r][c][I] != 0) && (m[r][c][D] != 0) && (m[r][c][A] != 0))
         				createWall();
         			a = 3;
-        		}else if((m[r][c+1][in] >= 0) && (m[r][c][D] > 0)) {
-        			if((m[r][c][I] != 0) && (m[r][c][F] != 0) && (m[r][c][I] != 0))
+        		}else if(m[r][c+1][in] == (count - 1)) {
+        			if((m[r][c][A] != 0) && (m[r][c][F] != 0) && (m[r][c][I] != 0))
         				createWall();
         			a = 0;
-        		}else if((m[r-1][c][in] >= 0) && (m[r][c][A] > 0)) {
+        		}else if(m[r-1][c][in] == (count - 1)) {
         			if((m[r][c][I] != 0) && (m[r][c][F] != 0) && (m[r][c][D] != 0))
         				createWall();
         			a = 1;
-        		}else if((m[r][c-1][in] >= 0) && (m[r][c][I] > 0)) {
+        		}else if(m[r][c-1][in] == (count - 1)) {
         			if((m[r][c][F] != 0) && (m[r][c][D] != 0) && (m[r][c][A] != 0))
         				createWall();
         			a = 2;
         		}
             break;		
             case 2:		// head down
-            	if((m[r][c+1][in] >= 0) && (m[r][c][D] > 0)) {
+            	if(m[r][c+1][in] == (count - 1)) {
             		if((m[r][c][I] != 0) && (m[r][c][F] != 0) && (m[r][c][A] != 0))
             			createWall();
         			a = 3;
-        		}else if((m[r-1][c][in] >= 0) && (m[r][c][A] > 0)) {
+        		}else if(m[r-1][c][in] == (count - 1)) {
         			if((m[r][c][I] != 0) && (m[r][c][F] != 0) && (m[r][c][D] != 0))
         				createWall();
         			a = 0;
-        		}else if((m[r][c-1][in] >= 0) && (m[r][c][I] > 0)) {
+        		}else if(m[r][c-1][in] == (count - 1)) {
         			if((m[r][c][F] != 0) && (m[r][c][D] != 0) && (m[r][c][A] != 0))
         				createWall();
         			a = 1;
-        		}else if((m[r+1][c][in] >= 0) && (m[r][c][F] > 0)) {
+        		}else if(m[r+1][c][in] == (count - 1)) {
         			if((m[r][c][I] != 0) && (m[r][c][D] != 0) && (m[r][c][A] != 0))
         				createWall();
         			a = 2;
         		}
             break;		
             case 3:		// head left
-            	if((m[r-1][c][in] >= 0) && (m[r][c][A] > 0)) {
+            	if(m[r-1][c][in] == (count - 1)) {
             		if((m[r][c][I] != 0) && (m[r][c][F] != 0) && (m[r][c][D] != 0))
             			createWall();
         			a = 3;
-        		}else if((m[r][c-1][in] >= 0) && (m[r][c][I] > 0)) {
+        		}else if(m[r][c-1][in] == (count - 1)) {
         			if((m[r][c][F] != 0) && (m[r][c][D] != 0) && (m[r][c][A] != 0))
         				createWall();
         			a = 0;
-        		}else if((m[r+1][c][in] >= 0) && (m[r][c][F] > 0)) {
+        		}else if(m[r+1][c][in] == (count - 1)) {
         			if((m[r][c][I] != 0) && (m[r][c][D] != 0) && (m[r][c][A] != 0))
         				createWall();
         			a = 1;
-        		}else if((m[r][c+1][in] >= 0) && (m[r][c][D] > 0)) {
+        		}else if(m[r][c+1][in] == (count - 1)) {
         			if((m[r][c][I] != 0) && (m[r][c][F] != 0) && (m[r][c][A] != 0))
         				createWall();
         			a = 2;
         		}
             break;		
             }
+    		count--;
     	}
     	return a;
     }
@@ -249,10 +252,9 @@ public class TeseoTest extends SimpleTeseoAgentProgram {
     @Override
     public int accion(boolean PF, boolean PD, boolean PA, boolean PI, boolean MT, boolean FAIL) {
     	int a = -1;
-    	m[r][c][in] = 1; // indicates that you have already passed through the box
+    	m[r][c][in] = count; // indicates that you have already passed through the box
     	
-    	if (MT) {
-    		m = new int[100][100][5];
+    	if (MT || m[50][50][in] <= 0) {
     		return -1;
     	}
     	
