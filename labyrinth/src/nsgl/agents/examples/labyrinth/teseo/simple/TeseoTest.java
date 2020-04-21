@@ -6,196 +6,238 @@ package nsgl.agents.examples.labyrinth.teseo.simple;
 
 /**
  *
- * @author Jonatan
+ * @author Tatiana
  */
 public class TeseoTest extends SimpleTeseoAgentProgram {
 
-	protected int[][] m = new int[100][100];
+	protected int[][][] m = new int[100][100][5];
 	protected int r;
 	protected int c;
 	protected int o;
 	
+	protected static int in = 0;	// if as been in the box			-	m[][][0]	-> 	1	else 	-1
+	protected static int I = 1;		// if there is a wall on the left	-	m[][][1]	-> 	1	else	-1
+	protected static int F = 2;		// if there is a wall in front		-	m[][][2]	-> 	1	else	-1
+	protected static int D = 3;		// if there is a wall on the right	-	m[][][3]	-> 	1	else	-1
+	protected static int A = 4;		// if there is a wall bellow		-	m[][][4]	-> 	1	else	-1
+	
+	
     public TeseoTest() {
     	r = 50; c = 50; o = 0;
-    	m[r][c] = 1;
+    	m[r][c][in] = 1;
     }
+    
     // Are there roads that I have not traveled?
     public boolean roadNotTraveled() { 	
-    	int left = m[r][c-1];
-    	int up = m[r+1][c];
-    	int right = m[r][c+1];
-    	int down = m[r-1][c];
+    	// Is there a wall or has it been there
+    	boolean left = ((m[r][c-1][in] != 0) || (m[r][c][I] < 0));
+    	boolean up = ((m[r+1][c][in] != 0) || (m[r][c][F] < 0 ));
+    	boolean right = ((m[r][c+1][in] != 0) || (m[r][c][D] < 0));
+    	boolean down = ((m[r-1][c][in] != 0) || (m[r][c][A] < 0));
     	
     	boolean result = true;
     	
-    	if((left != 0) && (up != 0) && (right != 0) && (down != 0))
+    	if(left && up && right && down)
     		result = false;   	
     	return result;
     }
     
+    //Create a false wall around the box
+    public void createWall() {
+    	for(int i = 0; i < 5; i++)
+    		m[r][c][i] = -1;
+    	m[r][c-1][D] = -1;
+    	m[r][c+1][I] = -1;
+    	m[r+1][c][A] = -1;
+    	m[r-1][c][F] = -1;
+    }
+    // If the value is 0, it means that it is not known whether or not there is a wall
     public void markWalls(boolean PI, boolean PF, boolean PD, boolean PA){
-    	if(PI) m[r][c-1] = -1;
-    	if(PF) m[r+1][c] = -1;
-    	if(PD) m[r][c+1] = -1;
-    	if(PA) m[r-1][c] = -1;
+    	if(PI) {
+    		m[r][c][I] = -1;
+    		m[r][c-1][D] = -1;
+    	}else {
+    		if(m[r][c][I] == 0) {
+    			m[r][c][I] = 1;
+    			m[r][c-1][D] = 1;
+    		}
+    	}
+    	
+    	if(PF) {
+    		m[r][c][F] = -1;
+    		m[r+1][c][A] = -1;
+    	}else {
+    		
+    		if(m[r][c][F] == 0) {
+    			m[r][c][F] = 1;
+    			m[r+1][c][A] = 1;
+    		}
+    	}
+    	
+    	if(PD) {
+    		m[r][c][D] = -1;
+    		m[r][c+1][I] = -1;
+    	}else {
+    		if(m[r][c][D] == 0) {
+    			m[r][c][D] = 1;
+    			m[r][c+1][I] = 1;
+    		}
+    	}
+    	
+    	if(PA) {
+    		m[r][c][A] = -1;
+    		m[r-1][c][F] = -1;
+    	}else {
+    		if(m[r][c][A] == 0) {
+    			m[r][c][A] = 1;
+    			m[r-1][c][F] = 1;
+    		}
+    	}    	
     }
-    
-    public int setOrientation(int o, int a) {
-        switch( o ) {
-        //case 0: a = a;	// head up		
-        case 1:		// head right
-        	switch(a){
-	    		case 0: a = 3; break;
-	    		case 1: a = 0; break;
-	    		case 2: a = 1; break;
-	    		default: a = 2; 
-	    	}
-        break;		
-        case 2:		// head down
-        	switch(a){
-	    		case 0: a = 2; break;
-	    		case 1: a = 3; break;
-	    		case 2: a = 0; break;
-	    		default: a = 1; 
-	    	}
-        break;		
-        case 3:		// head left
-        	switch(a){
-	    		case 0: a = 1; break;
-	    		case 1: a = 2; break;
-	    		case 2: a = 3; break;
-	    		default: a = 0; 
-	    	}
-        break;		
-        }
-        return a;
-    }
-    
+        
     public int getWay() {
     	int a = -1;
-    	
-    	if(roadNotTraveled()) { //mark as visited and advance
+    	// mark as visited and advance. Evaluate if there is a wall -> if(m[r][c][I] == 1) is true 
+    	if(roadNotTraveled()) {
     		switch( o ) {
             case 0:		// head up	
-        		if(m[r][c-1] == 0) {
-        			m[r][c-1] = 1;
+        		if((m[r][c-1][in] == 0) && (m[r][c][I] > 0)) {
+        			m[r][c-1][in] = 1;
         			a = 3;
-        		}else if(m[r+1][c] == 0) {
-        			m[r+1][c] = 1;
+        		}else if((m[r+1][c][in] == 0) && (m[r][c][F] > 0)) {
+        			m[r+1][c][in] = 1;
         			a = 0;		
-        		}else if(m[r][c+1] == 0) {
-        			m[r][c+1] = 1;
+        		}else if((m[r][c+1][in] == 0) && (m[r][c][D] > 0)) {
+        			m[r][c+1][in] = 1;
         			a = 1;
-        		}else {
-        			m[r-1][c] = 1;
+        		}else if((m[r-1][c][in] == 0) && (m[r][c][A] > 0)){
+        			m[r-1][c][in] = 1;
         			a = 2;
         		}
             break;	
             case 1:		// head right
-        		if(m[r+1][c] == 0) {
-        			m[r+1][c] = 1;
+        		if((m[r+1][c][in] == 0) && (m[r][c][F] > 0)) {
+        			m[r+1][c][in] = 1;
         			a = 3;
-        		}else if(m[r][c+1] == 0) {
-        			m[r][c+1] = 1;
+        		}else if((m[r][c+1][in] == 0) && (m[r][c][D] > 0)) {
+        			m[r][c+1][in] = 1;
         			a = 0;
-        		}else if(m[r-1][c] == 0) {
-        			m[r-1][c] = 1;
+        		}else if((m[r-1][c][in] == 0) && (m[r][c][A] > 0)) {
+        			m[r-1][c][in] = 1;
         			a = 1;
-        		}else {
-        			m[r][c-1] = 1;
+        		}else if((m[r][c-1][in] == 0) && (m[r][c][I] > 0)){
+        			m[r][c-1][in] = 1;
         			a = 2;
         		}
             break;		
             case 2:		// head down
-            	if(m[r][c+1] == 0) {
-            		m[r][c+1] = 1;
+            	if((m[r][c+1][in] == 0) && (m[r][c][D] > 0)) {
+            		m[r][c+1][in] = 1;
         			a = 3;
-        		}else if(m[r-1][c] == 0) {
-        			m[r-1][c] = 1;
+        		}else if((m[r-1][c][in] == 0) && (m[r][c][A] > 0)) {
+        			m[r-1][c][in] = 1;
         			a = 0;
-        		}else if(m[r][c-1] == 0) {
-        			m[r][c-1] = 1;
+        		}else if((m[r][c-1][in] == 0) && (m[r][c][I] > 0)) {
+        			m[r][c-1][in] = 1;
         			a = 1;
-        		}else {
-        			m[r+1][c] = 1;
+        		}else if((m[r+1][c][in] == 0) && (m[r][c][F] > 0)){
+        			m[r+1][c][in] = 1;
         			a = 2;
         		}
             break;		
             case 3:		// head left
-            	if(m[r-1][c] == 0) {
-        			m[r-1][c] = 1;
+            	if((m[r-1][c][in] == 0) && (m[r][c][A] > 0)) {
+        			m[r-1][c][in] = 1;
         			a = 3;
-        		}else if(m[r][c-1] == 0) {
-        			m[r][c-1] = 1;
+        		}else if((m[r][c-1][in] == 0) && (m[r][c][I] > 0)) {
+        			m[r][c-1][in] = 1;
         			a = 0;
-        		}else if(m[r+1][c] == 0) {
-        			m[r+1][c] = 1;
+        		}else if((m[r+1][c][in] == 0) && (m[r][c][F] > 0)) {
+        			m[r+1][c][in] = 1;
         			a = 1;
-        		}else {
-        			m[r][c+1] = 1;
+        		}else if((m[r][c+1][in] == 0) && (m[r][c][D] > 0)) {
+        			m[r][c+1][in] = 1;
         			a = 2;
         		}
-            break;		
+            break;
             }
-    	}else { // mark as wall and advance
+    	}else { 
+    		// Start creating walls where the goal is not, 
+    		// only if all the sides of the square have been evaluated. if not, it advances.
     		switch( o ) {
             case 0:		// head up	
-        		if(m[r][c-1] > 0) {
-        			m[r][c-1] = -1;
+        		if((m[r][c-1][in] >= 0) && (m[r][c][I] > 0)) {
+        			if((m[r][c][F] != 0) && (m[r][c][D] != 0) && (m[r][c][A] != 0))
+        				createWall();
         			a = 3;
-        		}else if(m[r+1][c] > 0) {
-        			m[r+1][c] = -1;
+        		}else if((m[r+1][c][in] >= 0) && (m[r][c][F] > 0)) {
+        			if((m[r][c][I] != 0) && (m[r][c][D] != 0) && (m[r][c][A] != 0))
+        				createWall();
         			a = 0;		
-        		}else if(m[r][c+1] > 0) {
-        			m[r][c+1] = -1;
+        		}else if((m[r][c+1][in] >= 0) && (m[r][c][D] > 0)) {
+        			if((m[r][c][I] != 0) && (m[r][c][F] >= 0) && (m[r][c][A] != 0))
+        				createWall();
         			a = 1;
-        		}else if(m[r-1][c] > 0) {
-        			m[r-1][c] = -1;
+        		}else if((m[r-1][c][in] >= 0) && (m[r][c][A] > 0)) {
+        			if((m[r][c][I] != 0) && (m[r][c][F] >= 0) && (m[r][c][D] != 0))
+        				createWall();
         			a = 2;
         		}
             break;	
             case 1:		// head right
-        		if(m[r+1][c] > 0) {
-        			m[r+1][c] = -1;
+        		if((m[r+1][c][in] >= 0) && (m[r][c][F] > 0)) {
+        			if((m[r][c][I] != 0) && (m[r][c][D] != 0) && (m[r][c][A] != 0))
+        				createWall();
         			a = 3;
-        		}else if(m[r][c+1] > 0) {
-        			m[r][c+1] = -1;
+        		}else if((m[r][c+1][in] >= 0) && (m[r][c][D] > 0)) {
+        			if((m[r][c][I] != 0) && (m[r][c][F] != 0) && (m[r][c][I] != 0))
+        				createWall();
         			a = 0;
-        		}else if(m[r-1][c] > 0) {
-        			m[r-1][c] = -1;
+        		}else if((m[r-1][c][in] >= 0) && (m[r][c][A] > 0)) {
+        			if((m[r][c][I] != 0) && (m[r][c][F] != 0) && (m[r][c][D] != 0))
+        				createWall();
         			a = 1;
-        		}else if(m[r][c-1] > 0) {
-        			m[r][c-1] = -1;
+        		}else if((m[r][c-1][in] >= 0) && (m[r][c][I] > 0)) {
+        			if((m[r][c][F] != 0) && (m[r][c][D] != 0) && (m[r][c][A] != 0))
+        				createWall();
         			a = 2;
         		}
             break;		
             case 2:		// head down
-            	if(m[r][c+1] > 0) {
-        			m[r][c+1] = -1;
+            	if((m[r][c+1][in] >= 0) && (m[r][c][D] > 0)) {
+            		if((m[r][c][I] != 0) && (m[r][c][F] != 0) && (m[r][c][A] != 0))
+            			createWall();
         			a = 3;
-        		}else if(m[r-1][c] > 0) {
-        			m[r-1][c] = -1;
+        		}else if((m[r-1][c][in] >= 0) && (m[r][c][A] > 0)) {
+        			if((m[r][c][I] != 0) && (m[r][c][F] != 0) && (m[r][c][D] != 0))
+        				createWall();
         			a = 0;
-        		}else if(m[r][c-1] > 0) {
-        			m[r][c-1] = -1;
+        		}else if((m[r][c-1][in] >= 0) && (m[r][c][I] > 0)) {
+        			if((m[r][c][F] != 0) && (m[r][c][D] != 0) && (m[r][c][A] != 0))
+        				createWall();
         			a = 1;
-        		}else if(m[r+1][c] > 0) {
-        			m[r+1][c] = -1;
+        		}else if((m[r+1][c][in] >= 0) && (m[r][c][F] > 0)) {
+        			if((m[r][c][I] != 0) && (m[r][c][D] != 0) && (m[r][c][A] != 0))
+        				createWall();
         			a = 2;
         		}
             break;		
             case 3:		// head left
-            	if(m[r-1][c] > 0) {
-        			m[r-1][c] = -1;
+            	if((m[r-1][c][in] >= 0) && (m[r][c][A] > 0)) {
+            		if((m[r][c][I] != 0) && (m[r][c][F] != 0) && (m[r][c][D] != 0))
+            			createWall();
         			a = 3;
-        		}else if(m[r][c-1] > 0) {
-        			m[r][c-1] = -1;
+        		}else if((m[r][c-1][in] >= 0) && (m[r][c][I] > 0)) {
+        			if((m[r][c][F] != 0) && (m[r][c][D] != 0) && (m[r][c][A] != 0))
+        				createWall();
         			a = 0;
-        		}else if(m[r+1][c] > 0) {
-        			m[r+1][c] = -1;
+        		}else if((m[r+1][c][in] >= 0) && (m[r][c][F] > 0)) {
+        			if((m[r][c][I] != 0) && (m[r][c][D] != 0) && (m[r][c][A] != 0))
+        				createWall();
         			a = 1;
-        		}else if(m[r][c+1] > 0) {
-        			m[r][c+1] = -1;
+        		}else if((m[r][c+1][in] >= 0) && (m[r][c][D] > 0)) {
+        			if((m[r][c][I] != 0) && (m[r][c][F] != 0) && (m[r][c][A] != 0))
+        				createWall();
         			a = 2;
         		}
             break;		
@@ -207,70 +249,40 @@ public class TeseoTest extends SimpleTeseoAgentProgram {
     @Override
     public int accion(boolean PF, boolean PD, boolean PA, boolean PI, boolean MT, boolean FAIL) {
     	int a = -1;
-    	m[r][c] = 1;
-    	
-    	System.out.println("NUEVO PASO");
-    	System.out.println("r: "+r+" c: "+c);
-    	System.out.println("\nANTES");
-    	System.out.println("XXXX: "+m[r][c]+" r: "+r+" c: "+ (c));
-    	System.out.println("left: "+m[r][c-1]+" r: "+r+" c: "+ (c-1));
-    	System.out.println("up: "+m[r+1][c]+" r: "+(r+1)+" c: "+ (c));
-    	System.out.println("right: "+m[r][c+1]+" r: "+(r)+" c: "+ (c+1));
-    	System.out.println("down: "+m[r-1][c]+" r: "+(r-1)+" c: "+ (c));
-    	System.out.println("o: "+o+" a: "+a);
+    	m[r][c][in] = 1; // indicates that you have already passed through the box
     	
     	if (MT) {
-    		m = new int[100][100];
+    		m = new int[100][100][5];
     		return -1;
     	}
     	
-    	System.out.println("\n");
-    	System.out.println("PF: "+PF+" PD: "+PD+" PA: "+PA+" PI: "+PI);
-    	
     	switch(o) {
     	case 0:		// head up
-    		System.out.println("\nH up");
     		markWalls(PI, PF, PD, PA);
     		break;
     	case 1:		// head right
-    		System.out.println("\nH rght");
     		markWalls(PA, PI, PF, PD);
     		break;
     	case 2:		// head down
-    		System.out.println("\nH down");
     		markWalls(PD, PA, PI, PF);
     		break;
     	case 3:		// head left
-    		System.out.println("\nH left");
     		markWalls(PF, PD, PA, PI);
     		break;
     	}
     	
-    	System.out.println("\nDespues - 1");
-    	System.out.println("left: "+m[r][c-1]+" r: "+r+" c: "+ (c-1));
-    	System.out.println("up: "+m[r+1][c]+" r: "+(r+1)+" c: "+ (c));
-    	System.out.println("right: "+m[r][c+1]+" r: "+(r)+" c: "+ (c+1));
-    	System.out.println("down: "+m[r-1][c]+" r: "+(r-1)+" c: "+ (c));
-    	System.out.println("a: "+a);
-    	
     	a = getWay();
     	
-    	System.out.println("\nDespues - 2");
-    	System.out.println("left: "+m[r][c-1]+" r: "+r+" c: "+ (c-1));
-    	System.out.println("up: "+m[r+1][c]+" r: "+(r+1)+" c: "+ (c));
-    	System.out.println("right: "+m[r][c+1]+" r: "+(r)+" c: "+ (c+1));
-    	System.out.println("down: "+m[r-1][c]+" r: "+(r-1)+" c: "+ (c));
-    	System.out.println("a: "+a);
-
+    	// a: means the turn at that time
+    	// o: indicates the agent orientation for the next iteration
     	
-        // Computing r, c, o
         switch( o ) {
         case 0:		// head up
         	switch(a){
         		case 0: r++; o=0; break;
         		case 1: c++; o=1; break;
         		case 2: r--; o=2; break;
-        		default: c--; o=3; 
+        		case 3: c--; o=3; break;
         	}
         break;		
         case 1:		// head right
@@ -278,7 +290,7 @@ public class TeseoTest extends SimpleTeseoAgentProgram {
         		case 0: c++; o=1; break;
         		case 1: r--; o=2; break;
         		case 2: c--; o=3; break;
-        		default: r++; o=0;
+        		case 3: r++; o=0; break;
         	}
         break;		
         case 2:		// head down
@@ -286,7 +298,7 @@ public class TeseoTest extends SimpleTeseoAgentProgram {
         		case 0: r--; o=2;break;
         		case 1: c--; o=3; break;
         		case 2: r++; o=0; break;
-        		default: c++; o=2; 
+        		case 3: c++; o=1; break; 
         	}
         break;		
         case 3:		// head left
@@ -294,13 +306,10 @@ public class TeseoTest extends SimpleTeseoAgentProgram {
         		case 0: c--; o=3;break;
         		case 1: r++; o=0; break;
         		case 2: c++; o=1; break;
-        		default: r--; o=2; 
+        		case 3: r--; o=2; break;
         	}
         break;		
         }
-        
-    	System.out.println("o: "+o+"\n");
-        
         return a;
     }
     
