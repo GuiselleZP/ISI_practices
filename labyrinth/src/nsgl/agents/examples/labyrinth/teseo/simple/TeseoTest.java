@@ -6,7 +6,7 @@ package nsgl.agents.examples.labyrinth.teseo.simple;
 
 /**
  *
- * @author Tatiana
+ * @author Grupo 7
  */
 public class TeseoTest extends SimpleTeseoAgentProgram {
 
