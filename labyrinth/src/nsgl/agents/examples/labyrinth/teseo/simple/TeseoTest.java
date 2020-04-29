@@ -12,11 +12,11 @@ public class TeseoTest extends SimpleTeseoAgentProgram {
 
 	protected int[][][] m = new int[100][100][5];
 	protected int r;
-	protected int c;
+	protected int c;	
 	protected int o;
 	protected int count;
 	
-	protected static int in = 0;	// if as been in the box			-	m[][][0]	-> 	1	else 	-1
+	protected static int in = 0;	// if as been in the box			-	m[][][0]	-> 	count	else 0
 	protected static int I = 1;		// if there is a wall on the left	-	m[][][1]	-> 	1	else	-1
 	protected static int F = 2;		// if there is a wall in front		-	m[][][2]	-> 	1	else	-1
 	protected static int D = 3;		// if there is a wall on the right	-	m[][][3]	-> 	1	else	-1
