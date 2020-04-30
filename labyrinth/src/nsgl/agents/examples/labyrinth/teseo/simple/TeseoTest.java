@@ -1,146 +1,119 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package nsgl.agents.examples.labyrinth.teseo.simple;
-
 /**
- *
  * @author Grupo 7
  */
 public class TeseoTest extends SimpleTeseoAgentProgram {
-
 	protected int[][][] m = new int[100][100][5];
 	protected int r;
 	protected int c;	
 	protected int o;
 	protected int count;
 	
-	protected static int in = 0;	// if as been in the box			-	m[][][0]	-> 	count	else 0
-	protected static int I = 1;		// if there is a wall on the left	-	m[][][1]	-> 	1	else	-1
-	protected static int F = 2;		// if there is a wall in front		-	m[][][2]	-> 	1	else	-1
-	protected static int D = 3;		// if there is a wall on the right	-	m[][][3]	-> 	1	else	-1
-	protected static int A = 4;		// if there is a wall bellow		-	m[][][4]	-> 	1	else	-1
-	
-	
+	protected static int in = 0;	// has been in the box	m[][][0]	true: count		false: 0
+	protected static int I = 1;		// wall on the left		m[][][1]	true: 1			false: 0
+	protected static int F = 2;		// wall in front		m[][][2]	true: 1			false: 0
+	protected static int D = 3;		// wall on the right	m[][][3]	true: 1			false: 0
+	protected static int A = 4;		// wall bellow			m[][][4]	true: 1			false: 0
+		
     public TeseoTest() {
-    	r = 50; c = 50; o = 0;
-    	count = 1;
+    	r = 50; c = 50; o = 0; count = 1;
     	m[r][c][in] = count;
     }
     
     // Are there roads that I have not traveled?
     public boolean roadNotTraveled() { 	
+    	boolean result = true;    	
     	// Is there a wall or has it been there
-    	boolean left = ((m[r][c-1][in] != 0) || (m[r][c][I] < 0));
-    	boolean up = ((m[r+1][c][in] != 0) || (m[r][c][F] < 0 ));
-    	boolean right = ((m[r][c+1][in] != 0) || (m[r][c][D] < 0));
-    	boolean down = ((m[r-1][c][in] != 0) || (m[r][c][A] < 0));
-    	
-    	boolean result = true;
+    	boolean left = ((m[r][c-1][in] != 0) || (m[r][c][I] > 0));
+    	boolean up = ((m[r+1][c][in] != 0) || (m[r][c][F] > 0 ));
+    	boolean right = ((m[r][c+1][in] != 0) || (m[r][c][D] > 0));
+    	boolean down = ((m[r-1][c][in] != 0) || (m[r][c][A] > 0));
     	
     	if(left && up && right && down)
-    		result = false;   	
+    		result = false;   	    	
     	return result;
     }
     
-    // If the value is 0, it means that it is not known whether or not there is a wall
     public void markWalls(boolean PI, boolean PF, boolean PD, boolean PA){
     	if(PI) {
-    		m[r][c][I] = -1;
-    		m[r][c-1][D] = -1;
-    	}else {
     		m[r][c][I] = 1;
-			m[r][c-1][D] = 1;
+    		m[r][c-1][D] = 1;
     	}
-    	
     	if(PF) {
-    		m[r][c][F] = -1;
-    		m[r+1][c][A] = -1;
-    	}else {
     		m[r][c][F] = 1;
-			m[r+1][c][A] = 1;
-    	}
-    	
-    	if(PD) {
-    		m[r][c][D] = -1;
-    		m[r][c+1][I] = -1;
-    	}else {
-    		m[r][c][D] = 1;
-			m[r][c+1][I] = 1;
-    	}
-    	
-    	if(PA) {
-    		m[r][c][A] = -1;
-    		m[r-1][c][F] = -1;
-    	}else {
-    		m[r][c][A] = 1;
-			m[r-1][c][F] = 1;
+    		m[r+1][c][A] = 1;
     	}    	
+    	if(PD) {
+    		m[r][c][D] = 1;
+    		m[r][c+1][I] = 1;
+    	}    	
+    	if(PA) {
+    		m[r][c][A] = 1;
+    		m[r-1][c][F] = 1;
+    	}   	
     }
             
     public int getWay() {
     	int a = -1;
-    	// mark as visited and advance. Evaluate if there is a wall -> if(m[r][c][I] == 1) is true 
     	if(roadNotTraveled()) {
     		count ++;
     		switch( o ) {
             case 0:		// head up	
-        		if((m[r][c-1][in] == 0) && (m[r][c][I] > 0)) {
+        		if((m[r][c-1][in] == 0) && (m[r][c][I] == 0)) {
         			m[r][c-1][in] = count;
         			a = 3;
-        		}else if((m[r+1][c][in] == 0) && (m[r][c][F] > 0)) {
+        		}else if((m[r+1][c][in] == 0) && (m[r][c][F] == 0)) {
         			m[r+1][c][in] = count;
         			a = 0;		
-        		}else if((m[r][c+1][in] == 0) && (m[r][c][D] > 0)) {
+        		}else if((m[r][c+1][in] == 0) && (m[r][c][D] == 0)) {
         			m[r][c+1][in] = count;
         			a = 1;
-        		}else if((m[r-1][c][in] == 0) && (m[r][c][A] > 0)){
+        		}else if((m[r-1][c][in] == 0) && (m[r][c][A] == 0)){
         			m[r-1][c][in] = count;
         			a = 2;
         		}
             break;	
             case 1:		// head right
-        		if((m[r+1][c][in] == 0) && (m[r][c][F] > 0)) {
+        		if((m[r+1][c][in] == 0) && (m[r][c][F] == 0)) {
         			m[r+1][c][in] = count;
         			a = 3;
-        		}else if((m[r][c+1][in] == 0) && (m[r][c][D] > 0)) {
+        		}else if((m[r][c+1][in] == 0) && (m[r][c][D] == 0)) {
         			m[r][c+1][in] = count;
         			a = 0;
-        		}else if((m[r-1][c][in] == 0) && (m[r][c][A] > 0)) {
+        		}else if((m[r-1][c][in] == 0) && (m[r][c][A] == 0)) {
         			m[r-1][c][in] = count;
         			a = 1;
-        		}else if((m[r][c-1][in] == 0) && (m[r][c][I] > 0)){
+        		}else if((m[r][c-1][in] == 0) && (m[r][c][I] == 0)){
         			m[r][c-1][in] = count;
         			a = 2;
         		}
             break;		
             case 2:		// head down
-            	if((m[r][c+1][in] == 0) && (m[r][c][D] > 0)) {
+            	if((m[r][c+1][in] == 0) && (m[r][c][D] == 0)) {
             		m[r][c+1][in] = count;
         			a = 3;
-        		}else if((m[r-1][c][in] == 0) && (m[r][c][A] > 0)) {
+        		}else if((m[r-1][c][in] == 0) && (m[r][c][A] == 0)) {
         			m[r-1][c][in] = count;
         			a = 0;
-        		}else if((m[r][c-1][in] == 0) && (m[r][c][I] > 0)) {
+        		}else if((m[r][c-1][in] == 0) && (m[r][c][I] == 0)) {
         			m[r][c-1][in] = count;
         			a = 1;
-        		}else if((m[r+1][c][in] == 0) && (m[r][c][F] > 0)){
+        		}else if((m[r+1][c][in] == 0) && (m[r][c][F] == 0)){
         			m[r+1][c][in] = count;
         			a = 2;
         		}
             break;		
             case 3:		// head left
-            	if((m[r-1][c][in] == 0) && (m[r][c][A] > 0)) {
+            	if((m[r-1][c][in] == 0) && (m[r][c][A] == 0)) {
         			m[r-1][c][in] = count;
         			a = 3;
-        		}else if((m[r][c-1][in] == 0) && (m[r][c][I] > 0)) {
+        		}else if((m[r][c-1][in] == 0) && (m[r][c][I] == 0)) {
         			m[r][c-1][in] = count;
         			a = 0;
-        		}else if((m[r+1][c][in] == 0) && (m[r][c][F] > 0)) {
+        		}else if((m[r+1][c][in] == 0) && (m[r][c][F] == 0)) {
         			m[r+1][c][in] = count;
         			a = 1;
-        		}else if((m[r][c+1][in] == 0) && (m[r][c][D] > 0)) {
+        		}else if((m[r][c+1][in] == 0) && (m[r][c][D] == 0)) {
         			m[r][c+1][in] = count;
         			a = 2;
         		}
@@ -149,48 +122,44 @@ public class TeseoTest extends SimpleTeseoAgentProgram {
     	}else {
     		switch( o ) {
             case 0:		// head up            	
-            	if(m[r][c-1][in] == (count - 1)) {
+            	if((m[r][c][I] == 0) && (m[r][c-1][in] == (count - 1)))
         			a = 3;
-        		}else if(m[r+1][c][in] == (count - 1)) {
+        		else if((m[r][c][F] == 0) && (m[r+1][c][in] == (count - 1)))
         			a = 0;		
-        		}else if(m[r][c+1][in] == (count - 1)) {
+        		else if((m[r][c][D] == 0) && (m[r][c+1][in] == (count - 1)))
         			a = 1;
-        		}else if(m[r-1][c][in] == (count - 1)) {
+        		else if((m[r][c][A] == 0) && (m[r-1][c][in] == (count - 1)))
         			a = 2;
-        		}
             break;	
             case 1:		// head right
-        		if(m[r+1][c][in] == (count - 1)) {
+        		if((m[r][c][F] == 0) && (m[r+1][c][in] == (count - 1)))
         			a = 3;
-        		}else if(m[r][c+1][in] == (count - 1)) {
+        		else if((m[r][c][D] == 0) && (m[r][c+1][in] == (count - 1)))
         			a = 0;
-        		}else if(m[r-1][c][in] == (count - 1)) {
+        		else if((m[r][c][A] == 0) && (m[r-1][c][in] == (count - 1)))
         			a = 1;
-        		}else if(m[r][c-1][in] == (count - 1)) {
+        		else if((m[r][c][I] == 0) && (m[r][c-1][in] == (count - 1)))
         			a = 2;
-        		}
             break;		
             case 2:		// head down
-            	if(m[r][c+1][in] == (count - 1)) {
+            	if((m[r][c][D] == 0) && (m[r][c+1][in] == (count - 1)))
         			a = 3;
-        		}else if(m[r-1][c][in] == (count - 1)) {
+        		else if((m[r][c][A] == 0) && (m[r-1][c][in] == (count - 1)))
         			a = 0;
-        		}else if(m[r][c-1][in] == (count - 1)) {
+        		else if((m[r][c][I] == 0) && (m[r][c-1][in] == (count - 1)))
         			a = 1;
-        		}else if(m[r+1][c][in] == (count - 1)) {
+        		else if((m[r][c][F] == 0) && (m[r+1][c][in] == (count - 1)))
         			a = 2;
-        		}
             break;		
             case 3:		// head left
-            	if(m[r-1][c][in] == (count - 1)) {
+            	if((m[r][c][A] == 0) && (m[r-1][c][in] == (count - 1)))
         			a = 3;
-        		}else if(m[r][c-1][in] == (count - 1)) {
+        		else if((m[r][c][I] == 0) && (m[r][c-1][in] == (count - 1)))
         			a = 0;
-        		}else if(m[r+1][c][in] == (count - 1)) {
+        		else if((m[r][c][F] == 0) && (m[r+1][c][in] == (count - 1)))
         			a = 1;
-        		}else if(m[r][c+1][in] == (count - 1)) {
+        		else if((m[r][c][D] == 0) && (m[r][c+1][in] == (count - 1)))
         			a = 2;
-        		}
             break;		
             }
     		count--;
@@ -198,14 +167,11 @@ public class TeseoTest extends SimpleTeseoAgentProgram {
     	return a;
     }
     
-    @Override
-    public int accion(boolean PF, boolean PD, boolean PA, boolean PI, boolean MT, boolean FAIL) {
-    	int a = -1;
-    	//m[r][c][in] = count; // indicates that you have already passed through the box
-    	
-    	if (MT || ((r == 50) && (c == 50) && (!roadNotTraveled()))) {
+    public int accion(boolean PF, boolean PD, boolean PA, boolean PI, boolean MT, boolean FAIL) {	
+    	if (MT || ((r == 50) && (c == 50) && (!roadNotTraveled())))
     		return -1;
-    	}
+    	
+    	int a = -1;
     	
     	switch(o) {
     	case 0:		// head up
@@ -221,12 +187,10 @@ public class TeseoTest extends SimpleTeseoAgentProgram {
     		markWalls(PF, PD, PA, PI);
     		break;
     	}
-    	
-    	a = getWay();    	
+    	a = getWay();
     	
     	// a: means the turn at that time
     	// o: indicates the agent orientation for the next iteration
-    	
         switch( o ) {
         case 0:		// head up
         	switch(a){
@@ -263,5 +227,4 @@ public class TeseoTest extends SimpleTeseoAgentProgram {
         }
         return a;
     }
-    
 }
